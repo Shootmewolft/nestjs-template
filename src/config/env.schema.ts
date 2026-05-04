@@ -1,7 +1,7 @@
 import * as v from "valibot";
 
 export const EnvSchema = v.object({
-	NODE_ENV: v.picklist(["development", "production", "qa"]),
+	NODE_ENV: v.picklist(["development", "production", "qa", "test"]),
 	PORT: v.pipe(
 		v.optional(v.string(), "3000"),
 		v.transform(Number),
