@@ -11,6 +11,11 @@ export const EnvSchema = v.object({
 	),
 	DATABASE_URL: v.pipe(v.string(), v.minLength(1)),
 	CSRF_SECRET: v.pipe(v.string(), v.minLength(32)),
+	JWT_SECRET: v.pipe(v.string(), v.minLength(32)),
+	JWT_EXPIRES_IN: v.optional(v.string(), "15m"),
+	JWT_REFRESH_SECRET: v.pipe(v.string(), v.minLength(32)),
+	JWT_REFRESH_EXPIRES_IN: v.optional(v.string(), "7d"),
+	CORS_ORIGIN: v.optional(v.string(), "*"),
 });
 
 export type Env = v.InferOutput<typeof EnvSchema>;

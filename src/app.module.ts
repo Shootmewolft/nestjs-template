@@ -1,8 +1,12 @@
+import { AuthModule } from "@modules/auth/auth.module";
+import { JwtAuthGuard } from "@modules/auth/guards/jwt-auth.guard";
 import { HealthModule } from "@modules/health/health.module";
-import { Module } from "@nestjs/common";
+import { UsersModule } from "@modules/users/users.module";
+import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { APP_GUARD } from "@nestjs/core";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
+import { RequestIdMiddleware } from "@/common";
 import { appConfig, validateEnv } from "@/config";
 import { DatabaseModule, databaseConfig } from "@/database";
 
@@ -35,6 +39,8 @@ const ENV = process.env.NODE_ENV ?? "development";
 		]),
 		DatabaseModule,
 		HealthModule,
+		AuthModule,
+		UsersModule,
 	],
 	controllers: [],
 	providers: [
@@ -42,6 +48,14 @@ const ENV = process.env.NODE_ENV ?? "development";
 			provide: APP_GUARD,
 			useClass: ThrottlerGuard,
 		},
+		{
+			provide: APP_GUARD,
+			useClass: JwtAuthGuard,
+		},
 	],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+	configure(consumer: MiddlewareConsumer) {
+		consumer.apply(RequestIdMiddleware).forRoutes("*");
+	}
+}

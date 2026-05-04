@@ -3,7 +3,7 @@ FROM oven/bun:1.3-alpine AS deps
 
 WORKDIR /app
 
-COPY package.json bun.lock ./
+COPY package.json bun.lockb ./
 RUN bun install --frozen-lockfile
 
 # ── Stage 2: dev ───────────────────────────────────────────────
@@ -12,6 +12,7 @@ FROM oven/bun:1.3-alpine AS dev
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
+COPY . .
 
 EXPOSE 3000
 
@@ -27,7 +28,7 @@ COPY . .
 
 RUN bun run build
 
-# ── Stage 3: runner ────────────────────────────────────────────
+# ── Stage 4: runner ────────────────────────────────────────────
 FROM node:24-alpine AS runner
 
 WORKDIR /app

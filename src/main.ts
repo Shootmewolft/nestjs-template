@@ -1,11 +1,21 @@
-import { ConsoleLogger, Logger, ValidationPipe } from "@nestjs/common";
+import {
+	ConsoleLogger,
+	Logger,
+	ValidationPipe,
+	VersioningType,
+} from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import compression from "compression";
 import { doubleCsrf } from "csrf-csrf";
 import { json } from "express";
 import helmet from "helmet";
 import { AppModule } from "./app.module";
-import { GlobalExceptionFilter, ResponseInterceptor } from "./common";
+import {
+	GlobalExceptionFilter,
+	LoggingInterceptor,
+	ResponseInterceptor,
+} from "./common";
 import { type AppConfig, appConfig } from "./config";
 
 async function main() {
@@ -15,7 +25,14 @@ async function main() {
 			timestamp: true,
 		}),
 	});
-	const { port, csrfSecret, nodeEnv } = app.get<AppConfig>(appConfig.KEY);
+	const { port, csrfSecret, nodeEnv, corsOrigin } = app.get<AppConfig>(
+		appConfig.KEY,
+	);
+
+	app.enableShutdownHooks();
+
+	app.enableVersioning({ type: VersioningType.URI, defaultVersion: "1" });
+
 	const { doubleCsrfProtection } = doubleCsrf({
 		getSecret: () => csrfSecret,
 		getSessionIdentifier: (req) =>
@@ -31,16 +48,28 @@ async function main() {
 		getCsrfTokenFromRequest: (req) => req.headers["x-csrf-token"] as string,
 	});
 	app.use(doubleCsrfProtection);
+
 	const pipeCustomValidations = new ValidationPipe({
 		whitelist: true,
 		forbidNonWhitelisted: true,
 		transform: true,
 	});
-	app.enableCors();
+
+	app.enableCors({
+		origin:
+			corsOrigin === "*" ? true : corsOrigin.split(",").map((o) => o.trim()),
+		methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
+		allowedHeaders: ["Content-Type", "Authorization", "X-CSRF-Token"],
+		credentials: true,
+	});
+	app.use(compression());
 	app.use(json({ limit: "5mb" }));
 	app.use(helmet());
 	app.useGlobalPipes(pipeCustomValidations);
-	app.useGlobalInterceptors(new ResponseInterceptor());
+	app.useGlobalInterceptors(
+		new LoggingInterceptor(),
+		new ResponseInterceptor(),
+	);
 	app.useGlobalFilters(new GlobalExceptionFilter());
 
 	const swaggerConfig = new DocumentBuilder()

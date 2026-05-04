@@ -1,3 +1,4 @@
+import { Public } from "@modules/auth/decorators/public.decorator";
 import { DatabaseHealthIndicator } from "@modules/health/infrastructure/adapters/database-health.adapter";
 import { Controller, Get } from "@nestjs/common";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
@@ -12,6 +13,7 @@ export class HealthController {
 	) {}
 
 	@Get()
+	@Public()
 	@HealthCheck()
 	@ApiOperation({
 		summary: "Check service health",
