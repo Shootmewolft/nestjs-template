@@ -1,0 +1,17 @@
+node_modules
+dist
+build
+coverage
+.git
+.github
+.vscode
+.agents
+*.tsbuildinfo
+*.log
+.env*
+!.env.example
+drizzle.config.js
+drizzle.config.js.map
+drizzle.config.d.ts
+.drizzle
+README.md

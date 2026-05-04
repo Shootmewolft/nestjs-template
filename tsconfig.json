@@ -1,0 +1,33 @@
+{
+	"compilerOptions": {
+		"module": "nodenext",
+		"moduleResolution": "nodenext",
+		"resolvePackageJsonExports": true,
+		"esModuleInterop": true,
+		"strict": true,
+		"isolatedModules": true,
+		"declaration": true,
+		"removeComments": true,
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true,
+		"allowSyntheticDefaultImports": true,
+		"target": "es2025",
+		"sourceMap": true,
+		"outDir": "./dist",
+		"types": ["node", "jest"],
+		"paths": {
+			"@/*": ["./src/*"],
+			"@modules/*": ["./src/modules/*"],
+			"@common/*": ["./src/common/*"],
+			"@config/*": ["./src/config/*"],
+			"@database/*": ["./src/database/*"]
+		},
+		"rootDir": "./src",
+		"incremental": false,
+		"skipLibCheck": true,
+		"strictNullChecks": true,
+		"forceConsistentCasingInFileNames": true,
+		"noFallthroughCasesInSwitch": false
+	},
+	"exclude": ["node_modules", "test", "dist", "drizzle.config.ts"]
+}
