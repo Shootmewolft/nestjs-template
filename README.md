@@ -1,98 +1,206 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# NestJS Template
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Base template para APIs REST con NestJS, PostgreSQL y Drizzle ORM. Clonalo, adaptalo y úsalo como punto de partida para cada proyecto.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Stack
 
-## Description
+- **Runtime**: Node.js 24 / Bun 1.3
+- **Framework**: NestJS 11
+- **Base de datos**: PostgreSQL 17 + Drizzle ORM
+- **Validación**: class-validator + Valibot (env)
+- **Autenticación**: JWT (access + refresh) via passport-jwt
+- **Seguridad**: Helmet, CSRF (csrf-csrf), Rate limiting, CORS configurable
+- **Docs**: Swagger / OpenAPI (JSON + YAML)
+- **Linting/Formato**: Biome
+- **Docker**: Multi-stage build (dev / builder / runner)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Estructura
 
-## Project setup
-
-```bash
-$ pnpm install
+```
+src/
+├── common/
+│   ├── filters/          # GlobalExceptionFilter
+│   ├── interceptors/     # ResponseInterceptor, LoggingInterceptor
+│   ├── middleware/        # RequestIdMiddleware
+│   ├── pagination/        # PaginationDto, PaginationService, PaginationModule
+│   └── types/            # ApiResponse, PaginatedApiResponse, ApiErrorResponse
+├── config/               # Variables de entorno tipadas con Valibot
+├── database/             # DatabaseModule, DrizzleDB, schema
+└── modules/
+    ├── auth/             # JwtStrategy, JwtRefreshStrategy, JwtAuthGuard, @Public()
+    ├── health/           # Health check (DB)
+    └── users/            # Módulo de ejemplo con arquitectura completa
+        ├── application/  # UsersService
+        ├── domain/       # UserEntity, IUserRepository
+        ├── infrastructure/database/  # users.schema.ts, UsersRepository
+        └── presentation/http/        # UsersController, DTOs
 ```
 
-## Compile and run the project
+## Primeros pasos
+
+### 1. Clonar y configurar el entorno
 
 ```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+cp .env.example .env
+# Edita .env con tus valores reales
 ```
 
-## Run tests
+Genera secrets seguros:
 
 ```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+openssl rand -hex 32  # para CSRF_SECRET, JWT_SECRET, JWT_REFRESH_SECRET
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### 2. Instalar dependencias
 
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+bun install
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### 3. Levantar la base de datos
 
-## Resources
+```bash
+bun run docker:db
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+### 4. Ejecutar migraciones
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```bash
+bun run push
+```
 
-## Support
+### 5. Iniciar en desarrollo
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+bun run dev
+```
 
-## Stay in touch
+La API estará disponible en `http://localhost:3000`.
+Swagger: `http://localhost:3000/docs`
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## Scripts
 
-## License
+| Script | Descripción |
+|---|---|
+| `bun run dev` | Modo watch (desarrollo) |
+| `bun run build` | Compila a `dist/` |
+| `bun run prod` | Ejecuta `dist/main.js` |
+| `bun run test` | Tests unitarios |
+| `bun run test:e2e` | Tests e2e |
+| `bun run test:cov` | Cobertura |
+| `bun run generate` | Genera migraciones Drizzle |
+| `bun run migrate` | Aplica migraciones |
+| `bun run push` | `generate` + `migrate` |
+| `bun run lint` | Linting con Biome |
+| `bun run check` | Lint + formato con Biome |
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## Docker
+
+```bash
+# Levantar todo (API + Postgres) en modo dev
+bun run docker:dev
+
+# Solo la base de datos
+bun run docker:db
+
+# Producción
+bun run docker:prod
+
+# Ver logs de la API
+bun run docker:logs
+```
+
+## Variables de entorno
+
+| Variable | Descripción | Default |
+|---|---|---|
+| `NODE_ENV` | `development` \| `production` \| `qa` | — |
+| `PORT` | Puerto HTTP | `3000` |
+| `DATABASE_URL` | Connection string PostgreSQL | — |
+| `CSRF_SECRET` | Secret para CSRF (mín. 32 chars) | — |
+| `JWT_SECRET` | Secret para access tokens (mín. 32 chars) | — |
+| `JWT_EXPIRES_IN` | Expiración del access token | `15m` |
+| `JWT_REFRESH_SECRET` | Secret para refresh tokens (mín. 32 chars) | — |
+| `JWT_REFRESH_EXPIRES_IN` | Expiración del refresh token | `7d` |
+| `CORS_ORIGIN` | Orígenes permitidos, separados por coma, o `*` | `*` |
+
+Ver `.env.example` para referencia completa.
+
+## Autenticación
+
+Todas las rutas están protegidas por `JwtAuthGuard` de forma global. Para rutas públicas usa el decorator `@Public()`:
+
+```ts
+import { Public } from '@modules/auth/decorators/public.decorator';
+
+@Public()
+@Get('ping')
+ping() { return 'pong'; }
+```
+
+Para acceder al usuario autenticado:
+
+```ts
+import { CurrentUser } from '@modules/auth/decorators/current-user.decorator';
+import type { JwtPayload } from '@modules/auth/domain/jwt-payload.interface';
+
+@Get('me')
+getMe(@CurrentUser() user: JwtPayload) {
+  return user;
+}
+```
+
+`AuthService.generateTokens(payload)` genera el par access/refresh token.
+
+## Crear un nuevo módulo
+
+Sigue el patrón del módulo `users/`:
+
+```
+src/modules/<nombre>/
+├── application/          # <Nombre>Service
+├── domain/               # entidad, interface de repositorio
+├── infrastructure/database/  # *.schema.ts, *.repository.ts
+└── presentation/http/    # controller, DTOs
+```
+
+Registra el schema en `src/database/database.connection.ts`:
+
+```ts
+import { tuTabla } from '@modules/<nombre>/infrastructure/database/<nombre>.schema';
+export const schema = { users, tuTabla };
+```
+
+## Respuestas estándar
+
+Todas las respuestas siguen el mismo formato:
+
+```jsonc
+// Éxito
+{ "success": true, "data": { ... }, "meta": { "timestamp": "..." } }
+
+// Paginado
+{ "success": true, "data": [...], "meta": { "timestamp": "...", "pagination": { ... } }, "links": { ... } }
+
+// Error
+{ "success": false, "error": { "code": "NOT_FOUND", "message": "..." }, "meta": { "timestamp": "..." } }
+```
+
+## Versionado
+
+Las rutas están versionadas por URI con prefijo `v1` por defecto:
+
+```
+GET /v1/users
+GET /v1/health  (sin versión, @Public)
+```
+
+Para cambiar la versión de un controlador:
+
+```ts
+@Controller({ path: 'users', version: '2' })
+```
+
+## Licencia
+
+MIT
